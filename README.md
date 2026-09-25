@@ -1,3 +1,5 @@
+![jevii — Jevi the SGI](docs/assets/jevii-banner.png)
+
 # jevii — Jevi the SGI (Super Intelligence)
 
 **Your AI assistant, on your Mac, in your chats.**
