@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>jevii</title>
+  <link rel="stylesheet" href="/static/styles.css?v=classic2" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a1a1a'/%3E%3Cpath d='M18 40c0-10 6-16 14-16s14 6 14 16' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='26' cy='30' r='3' fill='white'/%3E%3Ccircle cx='38' cy='30' r='3' fill='white'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="shell">
+    <aside class="rail" aria-label="Navigation">
+      <button class="rail-btn active" data-view="chat" title="Chat">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H9l-4 4v-4a3 3 0 0 1-1-2.2V6z" fill="currentColor"/></svg>
+      </button>
+      <button class="rail-btn" data-view="permissions" title="Permissions">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4zm0 6a2 2 0 0 0-2 2v2H9v6h6v-6h-1V10a2 2 0 0 0-2-2z" fill="currentColor"/></svg>
+      </button>
+      <button class="rail-btn" data-view="settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.1 12.9a7.5 7.5 0 0 0 .1-.9 7.5 7.5 0 0 0-.1-.9l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.3a.5.5 0 0 0-.6-.2l-2.4 1a7 7 0 0 0-1.6-.9l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7 7 0 0 0-1.6.9l-2.4-1a.5.5 0 0 0-.6.2L2.7 8.9a.5.5 0 0 0 .1.6l2 1.6a7.5 7.5 0 0 0-.1.9c0 .3 0 .6.1.9l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.3a.5.5 0 0 0 .6.2l2.4-1c.5.4 1 .7 1.6.9l.4 2.5a.5.5 0 0 0 .5.4h3.8a.5.5 0 0 0 .5-.4l.4-2.5c.6-.2 1.1-.5 1.6-.9l2.4 1a.5.5 0 0 0 .6-.2l1.9-3.3a.5.5 0 0 0-.1-.6l-2-1.6zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z" fill="currentColor"/></svg>
+      </button>
+      <div class="rail-spacer"></div>
+      <div class="rail-status" id="railStatus" title="Doctor status">●</div>
+    </aside>
+
+    <main class="card" id="mainCard">
+      <section class="view active" id="view-chat">
+        <header class="topbar">
+          <div>
+            <h1>jevii</h1>
+            <p class="sub">Vision-first desktop agent for your Mac</p>
+          </div>
+          <div class="top-actions">
+            <select id="providerSelect" aria-label="Provider">
+              <option value="chatgpt-oauth">ChatGPT (subscription)</option>
+              <option value="claude-oauth">Claude (subscription)</option>
+              <option value="grok-oauth">Grok (subscription)</option>
+              <option value="openai">OpenAI (API key)</option>
+              <option value="anthropic">Anthropic (API key)</option>
+              <option value="xai">xAI (API key)</option>
+              <option value="ollama">Ollama (local)</option>
+              <option value="lmstudio">LM Studio (local)</option>
+            </select>
+            <button class="ghost" id="btnDoctorMini" type="button">Doctor</button>
+          </div>
+        </header>
+        <div class="key-banner" id="keyBanner" hidden>
+          <span>No chat backend yet — connect a subscription, API key, or local model.</span>
+          <button type="button" class="primary" id="btnConnectBanner">Connect</button>
+        </div>
+        <div class="messages" id="messages" role="log" aria-live="polite"></div>
+        <form class="composer" id="composer">
+          <textarea id="input" rows="1" placeholder="Ask jevii anything about your Mac…" autocomplete="off"></textarea>
+          <button type="submit" class="send" id="sendBtn" aria-label="Send">
+            <svg viewBox="0 0 24 24"><path d="M3 11.5L21 3l-7.5 18-2.2-7.3L3 11.5z" fill="currentColor"/></svg>
+          </button>
+        </form>
+      </section>
+
+      <section class="view" id="view-permissions">
+        <header class="topbar">
+          <div>
+            <h1>Permission wizard</h1>
+            <p class="sub">Grant access and add TypeSafe (separate from chat) so jevii can click, type, and see the screen</p>
+          </div>
+          <button class="ghost" id="btnRefreshDoctor" type="button">Refresh status</button>
+        </header>
+        <div class="wizard" id="wizard">
+          <article class="step" data-pane="accessibility">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h2>Accessibility <span class="badge" id="badge-accessibility">…</span></h2>
+              <p>Lets jevii read UI elements and click buttons (AXPress).</p>
+              <ol class="howto">
+                <li>Click <strong>Open Settings</strong> below.</li>
+                <li>Enable the toggle for <strong id="binHint1">Python / Terminal / Grok Bot</strong>.</li>
+                <li>Return here and click <strong>Refresh status</strong>.</li>
+              </ol>
+              <button class="primary open-settings" data-pane="accessibility" type="button">Open Settings</button>
+            </div>
+          </article>
+          <article class="step" data-pane="screen_recording">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h2>Screen Recording <span class="badge" id="badge-screen_recording">…</span></h2>
+              <p>Required for screenshots and vision-first mouse control.</p>
+              <button class="primary open-settings" data-pane="screen_recording" type="button">Open Settings</button>
+            </div>
+          </article>
+          <article class="step" data-pane="full_disk">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h2>Full Disk Access <span class="badge soft" id="badge-full_disk">optional</span></h2>
+              <p>Optional. Needed only for protected folders.</p>
+              <button class="primary open-settings" data-pane="full_disk" type="button">Open Settings</button>
+            </div>
+          </article>
+          <article class="step" data-pane="typesafe" id="wizardTypesafe">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h2>TypeSafe key <span class="badge" id="badge-typesafe-wizard" data-badge="typesafe">…</span></h2>
+              <p>Separate from chat. Powers Jev goal-driven desktop/browser decisions. Paste a key from <a href="https://console.typesafe.ai/settings/keys" target="_blank" rel="noopener noreferrer">console.typesafe.ai</a>.</p>
+              <article class="provider-card" data-provider="typesafe">
+                <input type="password" class="key-input" data-provider="typesafe" placeholder="sk-… or ts-…" autocomplete="off" spellcheck="false" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary save-key-btn" data-provider="typesafe">Save TypeSafe key</button>
+                  <a class="key-link" href="https://console.typesafe.ai/settings/keys" target="_blank" rel="noopener noreferrer">Get a key →</a>
+                </div>
+              </article>
+              <p class="hint" id="wizardTypesafeMsg" hidden></p>
+            </div>
+          </article>
+          <div class="wizard-footer">
+            <button class="ghost" id="btnOpenAll" type="button">Open all three panes</button>
+            <p class="hint" id="processHint"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-settings">
+        <header class="topbar">
+          <div>
+            <h1>Settings</h1>
+            <p class="sub">Providers, local models, Telegram, and desktop tools</p>
+          </div>
+        </header>
+        <div class="settings">
+          <div class="panel" id="settingsTypesafePanel">
+            <h3>TypeSafe (Jev)</h3>
+            <p class="hint honest-note">Separate from chat. Required for goal-driven browser / turbo desktop decisions. Get a key at console.typesafe.ai → Settings → API keys. Stored at <code>~/.jev-ultrafast-mcp/TYPESAFE_API_KEY</code>.</p>
+            <div class="provider-cards settings-cards">
+              <article class="provider-card" data-provider="typesafe">
+                <div class="provider-card-head"><h4>TypeSafe API key</h4><span class="badge" data-badge="typesafe">…</span></div>
+                <input type="password" class="key-input" data-provider="typesafe" placeholder="sk-… or ts-…" autocomplete="off" spellcheck="false" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary save-key-btn" data-provider="typesafe">Save</button>
+                  <a class="key-link" href="https://console.typesafe.ai/settings/keys" target="_blank" rel="noopener noreferrer">Get a key →</a>
+                </div>
+              </article>
+            </div>
+            <p class="hint" id="settingsTypesafeMsg" hidden></p>
+          </div>
+          <div class="panel" id="settingsConnectPanel">
+            <h3>Sign in with a subscription</h3>
+            <p class="hint honest-note">Official OAuth (same path as OpenClaw/Hermes). Counts against plan quota, not Platform API billing when using OAuth.</p>
+            <div id="settingsOauthCards" class="oauth-cards"></div>
+          </div>
+          <div class="panel">
+            <h3>Or use an API key</h3>
+            <div class="provider-cards settings-cards" id="settingsProviderCards">
+              <article class="provider-card" data-provider="openai">
+                <div class="provider-card-head"><h4>OpenAI</h4><span class="badge" data-badge="openai">…</span></div>
+                <input type="password" class="key-input" data-provider="openai" placeholder="sk-…" autocomplete="off" spellcheck="false" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary save-key-btn" data-provider="openai">Save</button>
+                  <a class="key-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get a key →</a>
+                </div>
+              </article>
+              <article class="provider-card" data-provider="anthropic">
+                <div class="provider-card-head"><h4>Anthropic</h4><span class="badge" data-badge="anthropic">…</span></div>
+                <input type="password" class="key-input" data-provider="anthropic" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary save-key-btn" data-provider="anthropic">Save</button>
+                  <a class="key-link" href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer">Get a key →</a>
+                </div>
+              </article>
+              <article class="provider-card" data-provider="xai">
+                <div class="provider-card-head"><h4>xAI</h4><span class="badge" data-badge="xai">…</span></div>
+                <input type="password" class="key-input" data-provider="xai" placeholder="xai-…" autocomplete="off" spellcheck="false" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary save-key-btn" data-provider="xai">Save</button>
+                  <a class="key-link" href="https://console.x.ai" target="_blank" rel="noopener noreferrer">Get a key →</a>
+                </div>
+              </article>
+            </div>
+            <p class="hint" id="settingsKeyMsg" hidden></p>
+          </div>
+          <div class="panel" id="localPanel">
+            <h3>Local models</h3>
+            <p class="hint">Ollama (port 11434) and LM Studio OpenAI-compatible (port 1234). No cloud key needed.</p>
+            <div class="local-grid">
+              <article class="provider-card" data-local="ollama">
+                <div class="provider-card-head"><h4>Ollama</h4><span class="badge" id="badge-ollama">…</span></div>
+                <label class="field-label">Base URL</label>
+                <input class="key-input" id="ollamaBase" value="http://127.0.0.1:11434" />
+                <label class="field-label">Model</label>
+                <input class="key-input" id="ollamaModel" placeholder="llama3.2" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary" id="btnSaveOllama">Save</button>
+                  <button type="button" class="ghost" id="btnProbeOllama">Detect models</button>
+                </div>
+                <p class="hint" id="ollamaModels"></p>
+              </article>
+              <article class="provider-card" data-local="lmstudio">
+                <div class="provider-card-head"><h4>LM Studio</h4><span class="badge" id="badge-lmstudio">…</span></div>
+                <label class="field-label">Base URL</label>
+                <input class="key-input" id="lmstudioBase" value="http://127.0.0.1:1234/v1" />
+                <label class="field-label">Model</label>
+                <input class="key-input" id="lmstudioModel" placeholder="local-model" />
+                <div class="provider-card-actions">
+                  <button type="button" class="primary" id="btnSaveLmstudio">Save</button>
+                  <button type="button" class="ghost" id="btnProbeLmstudio">Detect models</button>
+                </div>
+                <p class="hint" id="lmstudioModels"></p>
+              </article>
+            </div>
+          </div>
+          <div class="panel" id="telegramPanel">
+            <h3>Telegram</h3>
+            <p class="hint honest-note" id="telegramGuide">Create a bot with @BotFather, paste the token, then Start bridge. jevii replies in Telegram with your connected model.</p>
+            <ol class="howto" id="telegramSteps">
+              <li>Open Telegram → search <strong>@BotFather</strong>.</li>
+              <li>Send <code>/newbot</code>, pick a name and username ending in <code>bot</code>.</li>
+              <li>Copy the token BotFather sends (looks like <code>123456:ABC…</code>).</li>
+              <li>Paste it below → <strong>Save token</strong> (stored in <code>~/jevii/.env</code>, chmod 600).</li>
+              <li>Optional: paste allowed numeric chat id(s), comma-separated (ask @userinfobot).</li>
+              <li>Click <strong>Start bridge</strong>, then message your bot with <code>/start</code>.</li>
+            </ol>
+            <label class="field-label">Bot token</label>
+            <input type="password" class="key-input" id="tgToken" placeholder="123456:ABC…" autocomplete="off" spellcheck="false" />
+            <label class="field-label">Allowed chat ids (optional)</label>
+            <input class="key-input" id="tgAllowed" placeholder="123456789,987654321" />
+            <div class="provider-card-actions">
+              <button type="button" class="primary" id="btnTgSave">Save token</button>
+              <button type="button" class="primary" id="btnTgStart">Start bridge</button>
+              <button type="button" class="ghost" id="btnTgStop">Stop</button>
+              <span class="badge" id="badge-telegram">…</span>
+            </div>
+            <p class="hint" id="tgMsg" hidden></p>
+          </div>
+          <div class="panel">
+            <h3>Chrome CDP</h3>
+            <p id="cdpStatus">Checking…</p>
+            <div class="row">
+              <button class="primary" id="btnEnsureCdp" type="button">Attach / launch CDP</button>
+              <button class="ghost" id="btnListTabs" type="button">List tabs</button>
+            </div>
+            <pre class="code" id="cdpOut"></pre>
+          </div>
+          <div class="panel">
+            <h3>Desktop smoke</h3>
+            <div class="row">
+              <button class="ghost" id="btnShot" type="button">Take screenshot</button>
+              <button class="ghost" id="btnGoalDry" type="button">Dry-run Calculator goal</button>
+            </div>
+            <pre class="code" id="deskOut"></pre>
+            <img id="shotPreview" class="shot" alt="" hidden />
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="connectModal" hidden role="dialog" aria-modal="true" aria-labelledby="connectModalTitle">
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2 id="connectModalTitle">Connect jevii</h2>
+        <p class="sub">Sign in with a subscription, or use an API key / local model.</p>
+      </header>
+      <div id="modalOauthCards" class="oauth-cards"></div>
+      <p class="honest-note section-label">Or use an API key</p>
+      <div class="provider-cards" id="modalProviderCards">
+        <article class="provider-card" data-provider="openai">
+          <div class="provider-card-head"><h4>OpenAI</h4><span class="badge" data-badge="openai">…</span></div>
+          <input type="password" class="key-input" data-provider="openai" placeholder="sk-…" autocomplete="off" spellcheck="false" />
+          <div class="provider-card-actions">
+            <button type="button" class="primary save-key-btn" data-provider="openai">Save</button>
+          </div>
+        </article>
+        <article class="provider-card" data-provider="anthropic">
+          <div class="provider-card-head"><h4>Anthropic</h4><span class="badge" data-badge="anthropic">…</span></div>
+          <input type="password" class="key-input" data-provider="anthropic" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+          <div class="provider-card-actions">
+            <button type="button" class="primary save-key-btn" data-provider="anthropic">Save</button>
+          </div>
+        </article>
+        <article class="provider-card" data-provider="xai">
+          <div class="provider-card-head"><h4>xAI</h4><span class="badge" data-badge="xai">…</span></div>
+          <input type="password" class="key-input" data-provider="xai" placeholder="xai-…" autocomplete="off" spellcheck="false" />
+          <div class="provider-card-actions">
+            <button type="button" class="primary save-key-btn" data-provider="xai">Save</button>
+          </div>
+        </article>
+      </div>
+      <p class="hint modal-msg" id="modalKeyMsg" hidden></p>
+      <footer class="modal-foot">
+        <button type="button" class="ghost" id="btnSkipConnect">Skip for now</button>
+      </footer>
+    </div>
+  </div>
+  <script src="/static/app.js?v=typesafe3"></script>
+</body>
+</html>

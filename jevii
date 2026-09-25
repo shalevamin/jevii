@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+SOURCE="${BASH_SOURCE[0]:-$0}"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+ROOT="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+# shellcheck disable=SC1091
+[ -f "$ROOT/env.sh" ] && source "$ROOT/env.sh"
+export JEVII_ROOT="$ROOT"
+export PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}"
+cd "$ROOT"
+exec "$ROOT/venv/bin/python" -m server.cli "$@"

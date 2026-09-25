@@ -1,0 +1,12 @@
+venv/
+.env
+.auth/
+.chrome-cdp/
+shots/
+__pycache__/
+*.pyc
+.DS_Store
+workspace/
+exports/
+*.mov
+*.mp4
